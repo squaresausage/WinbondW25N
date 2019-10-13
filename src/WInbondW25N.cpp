@@ -4,14 +4,17 @@ W25N::W25N(){};
 
 
 void W25N::sendData(char * buf, int len){
+  
+  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(_cs, LOW);
 	SPI.transfer(buf, len);
 	digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
 }
 
 int W25N::begin(int cs){
 	SPI.begin();
-  SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
+  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
   _cs = cs;
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
@@ -76,11 +79,13 @@ void W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   char cmdbuf[3] = {W25N_PROG_DATA_LOAD, columnHigh, columnLow};
   this->block_WIP();
   this->writeEnable();
+  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(_cs, LOW);
 	SPI.transfer(cmdbuf, sizeof(cmdbuf));
   //TODO check data len
   SPI.transfer(buf, dataLen);
 	digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
 }
 
 void W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
@@ -89,11 +94,13 @@ void W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   char cmdbuf[3] = {W25N_RAND_PROG_DATA_LOAD, columnHigh, columnLow};
   this->block_WIP();
   this->writeEnable();
+  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(_cs, LOW);
 	SPI.transfer(cmdbuf, sizeof(cmdbuf));
   //TODO check data len
   SPI.transfer(buf, dataLen);
 	digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
 }
 
 void W25N::ProgramExecute(uint16_t add){
@@ -118,11 +125,13 @@ void W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
   char columnLow = columnAdd & 0xff;
   char cmdbuf[4] = {W25N_READ, columnHigh, columnLow, 0x00};
   this->block_WIP();
+  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(_cs, LOW);
 	SPI.transfer(cmdbuf, sizeof(cmdbuf));
   //TODO check data len
   SPI.transfer(buf, dataLen);
 	digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
 }
 //Returns the Write In Progress bit from flash.
 int W25N::check_WIP(){
