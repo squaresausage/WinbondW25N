@@ -4,7 +4,6 @@ W25N::W25N(){};
 
 
 void W25N::sendData(char * buf, int len){
-  
   SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(_cs, LOW);
 	SPI.transfer(buf, len);
@@ -14,7 +13,6 @@ void W25N::sendData(char * buf, int len){
 
 int W25N::begin(int cs){
 	SPI.begin();
-  SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
   _cs = cs;
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH);
@@ -59,6 +57,7 @@ void W25N::writeDisable(){
 }
 
 void W25N::blockErase(uint16_t pageAdd){
+  //TODO check page within bounds
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
   char buf[4] = {W25N_BLOCK_ERASE, 0x00, pageHigh, pageLow};
@@ -74,6 +73,7 @@ for(int i = 0; i < W25N_MAX_PAGE; i++){
 }
 
 void W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
+  //TODO check columnAdd and dataLen within bounds
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[3] = {W25N_PROG_DATA_LOAD, columnHigh, columnLow};
@@ -89,6 +89,7 @@ void W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
 }
 
 void W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
+  //TODO check columnAdd and dataLen within bounds
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[3] = {W25N_RAND_PROG_DATA_LOAD, columnHigh, columnLow};
@@ -104,6 +105,7 @@ void W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
 }
 
 void W25N::ProgramExecute(uint16_t add){
+  //TODO check add within bounds
   char pageHigh = (char)((add & 0xFF00) >> 8);
   char pageLow = (char)(add);
   this->writeEnable();
@@ -112,6 +114,7 @@ void W25N::ProgramExecute(uint16_t add){
 }
 
 void W25N::pageDataRead(uint16_t add){
+  //TODO check add within bounds
   char pageHigh = (char)((add & 0xFF00) >> 8);
   char pageLow = (char)(add);
   char buf[4] = {W25N_PAGE_DATA_READ, 0x00, pageHigh, pageLow};
@@ -121,6 +124,7 @@ void W25N::pageDataRead(uint16_t add){
 }
 
 void W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
+  //TODO check columnAdd and dataLen within bounds
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[4] = {W25N_READ, columnHigh, columnLow, 0x00};

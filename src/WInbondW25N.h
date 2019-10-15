@@ -3,6 +3,8 @@
  * Written by Cameron Houston for UGRacing Formula Student
  * 09 2019
  */
+
+//TODO add support for multi-Gb chips that require bank switching
  
 #ifndef WinbondW25N_H
 #define WinbondW25N_H
@@ -10,32 +12,32 @@
 #include "Arduino.h"
 #include <SPI.h>
 
-#define W25N_RESET					0xFF
-#define W25N_JEDEC_ID				0x9F
-#define W25N_READ_STATUS_REG		0x05
-#define W25N_WRITE_STATUS_REG		0x01
-#define W25N_WRITE_ENABLE			0x06
-#define W25N_WRITE_DISABLE			0x04
-#define W25N_BB_MANAGE				0xA1
-#define W25N_READ_BBM				0xA5
-#define W25N_LAST_ECC_FAIL			0xA9
-#define W25N_BLOCK_ERASE			0xD8
-#define W25N_PROG_DATA_LOAD			0x02
+#define W25N_RESET								0xFF
+#define W25N_JEDEC_ID							0x9F
+#define W25N_READ_STATUS_REG			0x05
+#define W25N_WRITE_STATUS_REG			0x01
+#define W25N_WRITE_ENABLE					0x06
+#define W25N_WRITE_DISABLE				0x04
+#define W25N_BB_MANAGE						0xA1
+#define W25N_READ_BBM							0xA5
+#define W25N_LAST_ECC_FAIL				0xA9
+#define W25N_BLOCK_ERASE					0xD8
+#define W25N_PROG_DATA_LOAD				0x02
 #define W25N_RAND_PROG_DATA_LOAD	0x84
-#define W25N_PROG_EXECUTE			0x10
-#define W25N_PAGE_DATA_READ			0x13
-#define W25N_READ					0x03
-#define W25N_FAST_READ				0x0B
+#define W25N_PROG_EXECUTE					0x10
+#define W25N_PAGE_DATA_READ				0x13
+#define W25N_READ									0x03
+#define W25N_FAST_READ						0x0B
 
-#define W25N_PROT_REG				0xA0
-#define W25N_CONFIG_REG				0xB0
-#define W25N_STAT_REG				0xC0
+#define W25N_PROT_REG							0xA0
+#define W25N_CONFIG_REG						0xB0
+#define W25N_STAT_REG							0xC0
 
-#define W25N_JEDEC_RETURN_1			0xEF
-#define W25N_JEDEC_RETURN_2			0xAA
-#define W25N_JEDEC_RETURN_3			0x21
+#define W25N_JEDEC_RETURN_1				0xEF
+#define W25N_JEDEC_RETURN_2				0xAA
+#define W25N_JEDEC_RETURN_3				0x21
 
-#define W25N_MAX_PAGE 65535
+#define W25N_MAX_PAGE 						65535
 
 
 class W25N {
@@ -79,21 +81,18 @@ class W25N {
 
 		/* blockErase(uint16_t pageAdd) -- Erases one block of data on the flash chip. One block is 64 Pages, and any given 
 		 * page address within the block will erase that block.
-		 * Requires write enable! 
 		 * */
 		void blockErase(uint16_t pageAdd);
 
 		/* bulkErase() -- Erases the entire chip
 		 * THIS TAKES A VERY LONG TIME, ~30 SECONDS
-		 * Use a busy check before any use! 
-		 * Requires write enable! */
+		 * Use a busy check before any use! */
 		void bulkErase();
 
 		/* loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen) -- Transfers datalen number of bytes from the 
 		 * given buffer to the internal flash buffer, to be programed once a ProgramExecute command is sent.
 		 * datalLen cannot be more than the internal buffer size of 2111 bytes, or 2048 if ECC is enabled on chip.
 		 * When called any data in the internal buffer beforehand will be nullified.
-		 * Requires write enable! 
 		 * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
 		 * */
 		void loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
@@ -103,7 +102,6 @@ class W25N {
 		 * datalLen cannot be more than the internal buffer size of 2111 bytes, or 2048 if ECC is enabled on chip.
 		 * Unlike the normal loadProgData the loadRandProgData function allows multiple transfers to the internal buffer
 		 * without the nulling of the currently kept data. 
-		 * Requires write enable! 
 		 * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
 		 */
 		void loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
@@ -111,8 +109,7 @@ class W25N {
 		/* ProgramExecute(uint16_t add) -- Commands the flash to program the internal buffer contents to the addres page
 		 * given after a loadProgData or loadRandProgData has been called.
 		 * The selected page needs to be erased prior to use as the falsh chip can only change 1's to 0's
-		 * This command will put the flash in a busy state for a time, so busy checking is required ater use. 
-		 * Requires write enable! */
+		 * This command will put the flash in a busy state for a time, so busy checking is required ater use.  */
 		void ProgramExecute(uint16_t add);
 
 		//pageDataRead(uint16_t add) -- Commands the flash to read from the given page address into
