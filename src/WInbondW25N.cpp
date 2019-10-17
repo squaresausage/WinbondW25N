@@ -64,13 +64,15 @@ int W25N::blockErase(uint16_t pageAdd){
   this->block_WIP();
   this->writeEnable();
   this->sendData(buf, sizeof(buf));
+  return 0;
 }
 
 int W25N::bulkErase(){
   int error = 0;
   for(int i = 0; i < W25N_MAX_PAGE; i++){
-    if(error = this->blockErase(i) != 0) return error;
+    if((error = this->blockErase(i)) != 0) return error;
   }
+  return 0;
 }
 
 int W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
@@ -87,6 +89,7 @@ int W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   SPI.transfer(buf, dataLen);
   digitalWrite(_cs, HIGH);
   SPI.endTransaction();
+  return 0;
 }
 
 int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
@@ -103,28 +106,31 @@ int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   SPI.transfer(buf, dataLen);
   digitalWrite(_cs, HIGH);
   SPI.endTransaction();
+  return 0;
 }
 
 int W25N::ProgramExecute(uint16_t pageAdd){
   if(pageAdd > W25N_MAX_PAGE) return 1;
-  char pageHigh = (char)((add & 0xFF00) >> 8);
-  char pageLow = (char)(add);
+  char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
+  char pageLow = (char)(pageAdd);
   this->writeEnable();
   char buf[4] = {W25N_PROG_EXECUTE, 0x00, pageHigh, pageLow};
   this->sendData(buf, sizeof(buf));
+  return 0;
 }
 
 int W25N::pageDataRead(uint16_t pageAdd){
   if(pageAdd > W25N_MAX_PAGE) return 1;
-  char pageHigh = (char)((add & 0xFF00) >> 8);
-  char pageLow = (char)(add);
+  char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
+  char pageLow = (char)(pageAdd);
   char buf[4] = {W25N_PAGE_DATA_READ, 0x00, pageHigh, pageLow};
   this->block_WIP();
   this->sendData(buf, sizeof(buf));
+  return 0;
 
 }
 
-void W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
+int W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
   if(columnAdd > W25N_MAX_COLUMN) return 1;
   if(dataLen > W25N_MAX_COLUMN - columnAdd) return 1;
   char columnHigh = (columnAdd & 0xFF00) >> 8;
@@ -137,6 +143,7 @@ void W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
   SPI.transfer(buf, dataLen);
   digitalWrite(_cs, HIGH);
   SPI.endTransaction();
+  return 0;
 }
 //Returns the Write In Progress bit from flash.
 int W25N::check_WIP(){
@@ -153,7 +160,8 @@ int W25N::block_WIP(){
   while(this->check_WIP()){
     delay(1);
     if (millis() > tstamp + 15) return 1;
-  };
+  }
+  return 0;
 }
 
 int W25N::check_status(){

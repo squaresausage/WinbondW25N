@@ -100,7 +100,7 @@ class W25N {
      * When called any data in the internal buffer beforehand will be nullified.
      * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
      * */
-    void loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
+    int loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
 
     /* loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen) -- Transfers datalen number of bytes from the 
      * given buffer to the internal flash buffer, to be programed once a ProgramExecute command is sent.
@@ -109,7 +109,7 @@ class W25N {
      * without the nulling of the currently kept data. 
      * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
      */
-    void loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
+    int loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
 
     /* ProgramExecute(uint16_t add) -- Commands the flash to program the internal buffer contents to the addres page
      * given after a loadProgData or loadRandProgData has been called.
@@ -126,7 +126,7 @@ class W25N {
     //columnAdd is a buffer index (0-2047) or (0 - 2111) including ECC bits
     //char* buf is a pointer to the buffer to be read into
     //datalen is the length of data that should be read from the buffer (up to 2111)
-    void read(uint16_t columnAdd, char* buf, uint32_t dataLen);
+    int read(uint16_t columnAdd, char* buf, uint32_t dataLen);
 
     //check_WIP() -- checks if the flash is busy with an operation
     //Output: true if busy, false if free
