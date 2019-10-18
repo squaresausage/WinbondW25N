@@ -19,7 +19,7 @@ int W25N::begin(uint32_t cs){
 
   this->reset();
 
-  char jedec[5] = {W25N_JEDEC_ID, 0x00, 0x00, 0x00, 0x00,};
+  char jedec[5] = {W25N_JEDEC_ID, 0x00, 0x00, 0x00, 0x00};
   this->sendData(jedec, sizeof(jedec));
   if(jedec[2] == W25N_JEDEC_RETURN_1){
     if(jedec[3] == W25N_JEDEC_RETURN_2 && jedec[4] == W25N_JEDEC_RETURN_3){
