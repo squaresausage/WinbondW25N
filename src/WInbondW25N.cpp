@@ -3,7 +3,7 @@
 W25N::W25N(){};
 
 
-void W25N::sendData(char * buf, int len){
+void W25N::sendData(char * buf, uint32_t len){
   SPI.beginTransaction(SPISettings(80000000, MSBFIRST, SPI_MODE0));
   digitalWrite(_cs, LOW);
   SPI.transfer(buf, len);
@@ -11,7 +11,7 @@ void W25N::sendData(char * buf, int len){
   SPI.endTransaction();
 }
 
-int W25N::begin(int cs){
+int W25N::begin(uint32_t cs){
   SPI.begin();
   _cs = cs;
   pinMode(_cs, OUTPUT);
@@ -56,7 +56,7 @@ void W25N::writeDisable(){
   this->sendData(buf, sizeof(buf));
 }
 
-int W25N::blockErase(uint16_t pageAdd){
+int W25N::blockErase(uint32_t pageAdd){
   if(pageAdd > W25N_MAX_PAGE) return 1;
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
@@ -109,7 +109,7 @@ int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   return 0;
 }
 
-int W25N::ProgramExecute(uint16_t pageAdd){
+int W25N::ProgramExecute(uint32_t pageAdd){
   if(pageAdd > W25N_MAX_PAGE) return 1;
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
@@ -119,7 +119,7 @@ int W25N::ProgramExecute(uint16_t pageAdd){
   return 0;
 }
 
-int W25N::pageDataRead(uint16_t pageAdd){
+int W25N::pageDataRead(uint32_t pageAdd){
   if(pageAdd > W25N_MAX_PAGE) return 1;
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);

@@ -53,12 +53,12 @@ class W25N {
      * The buffer that is passed to the function will have its dat sent to the
      * flash chip, and the data recieved will be written back to that same 
      * buffer. */
-    void sendData(char * buf, int len);
+    void sendData(char * buf, uint32_t len);
 
     /* begin(int cs) -- initialises the flash and checks that the flash is 
      * functioning and is the right model.
      * Output -- 0 if working, 1 if error*/
-    int begin(int cs);
+    int begin(uint32_t cs);
 
     /* reset() -- resets the device. */
     void reset();
@@ -82,11 +82,11 @@ class W25N {
     /* writeDisable() -- disables all write opperations on the chip */
     void writeDisable();
 
-    /* blockErase(uint16_t pageAdd) -- Erases one block of data on the flash chip. One block is 64 Pages, and any given 
+    /* blockErase(uint32_t pageAdd) -- Erases one block of data on the flash chip. One block is 64 Pages, and any given 
      * page address within the block will erase that block.
      * Rerturns 0 if successful
      * */
-    int blockErase(uint16_t pageAdd);
+    int blockErase(uint32_t pageAdd);
 
     /* bulkErase() -- Erases the entire chip
      * THIS TAKES A VERY LONG TIME, ~30 SECONDS
@@ -111,16 +111,16 @@ class W25N {
      */
     int loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
 
-    /* ProgramExecute(uint16_t add) -- Commands the flash to program the internal buffer contents to the addres page
+    /* ProgramExecute(uint32_t add) -- Commands the flash to program the internal buffer contents to the addres page
      * given after a loadProgData or loadRandProgData has been called.
      * The selected page needs to be erased prior to use as the falsh chip can only change 1's to 0's
      * This command will put the flash in a busy state for a time, so busy checking is required ater use.  */
-    int ProgramExecute(uint16_t pageAdd);
+    int ProgramExecute(uint32_t pageAdd);
 
-    //pageDataRead(uint16_t add) -- Commands the flash to read from the given page address into
+    //pageDataRead(uint32_t add) -- Commands the flash to read from the given page address into
     //its internal buffer, to be read using the read() function. 
     //This command will put the flash in a busy state for a time, so busy checking is required after use.
-    int pageDataRead(uint16_t pageAdd);
+    int pageDataRead(uint32_t pageAdd);
 
     //read(uint16_t columnAdd, char* buf, uint32_t dataLen) -- Reads data from the flash internal buffer
     //columnAdd is a buffer index (0-2047) or (0 - 2111) including ECC bits
