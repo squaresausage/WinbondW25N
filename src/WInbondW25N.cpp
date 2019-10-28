@@ -21,9 +21,15 @@ int W25N::begin(uint32_t cs){
 
   char jedec[5] = {W25N_JEDEC_ID, 0x00, 0x00, 0x00, 0x00};
   this->sendData(jedec, sizeof(jedec));
-  if(jedec[2] == W25N_JEDEC_RETURN_1){
-    if(jedec[3] == W25N_JEDEC_RETURN_2 && jedec[4] == W25N_JEDEC_RETURN_3){
+  if(jedec[2] == WINBOND_MAN_ID){
+    if((uint16_t)(jedec[3] << 8 | jedec[4]) == W25N01GV_DEV_ID){
       this->setStatusReg(W25N_PROT_REG, 0x00);
+      this->_model = W25N01GV;
+      return 0;
+    }
+    if((uint16_t)(jedec[3] << 8 | jedec[4]) == W25M02GV_DEV_ID){
+      this->setStatusReg(W25N_PROT_REG, 0x00);
+      this->_model = W25M02GV;
       return 0;
     }
   }

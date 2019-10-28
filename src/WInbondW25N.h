@@ -35,17 +35,24 @@
 #define W25N_CONFIG_REG           0xB0
 #define W25N_STAT_REG             0xC0
 
-#define W25N_JEDEC_RETURN_1       0xEF
-#define W25N_JEDEC_RETURN_2       0xAA
-#define W25N_JEDEC_RETURN_3       0x21
+#define WINBOND_MAN_ID            0xEF
+#define W25N01GV_DEV_ID           0xAA21
+
+#define W25M02GV_DEV_ID           0xAB21
 
 #define W25N_MAX_PAGE             65535
 #define W25N_MAX_COLUMN           2112
+
+enum chipModels{
+  W25N01GV,
+  W25M02GV
+};
 
 
 class W25N {
   private:
     int _cs;
+    enum chipModels _model;
   public:
     W25N();
 
