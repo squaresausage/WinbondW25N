@@ -14,6 +14,8 @@
 #include "Arduino.h"
 #include <SPI.h>
 
+#define W25M_DIE_SELECT           0xC2
+
 #define W25N_RESET                0xFF
 #define W25N_JEDEC_ID             0x9F
 #define W25N_READ_STATUS_REG      0x05
@@ -40,8 +42,10 @@
 
 #define W25M02GV_DEV_ID           0xAB21
 
-#define W25N_MAX_PAGE             65535
+#define W25N01GV_MAX_PAGE         65535
 #define W25N_MAX_COLUMN           2112
+#define W25M02GV_MAX_PAGE         131071
+#define W25M02GV_MAX_DIES         2
 
 enum chipModels{
   W25N01GV,
@@ -53,6 +57,15 @@ class W25N {
   private:
     int _cs;
     enum chipModels _model;
+    int _dieSelect;
+
+    /* int dieSelect(uint32_t die) -- Selects the active die on a multi die chip (W25*M*)
+     * Input - die number starting at 0
+     * Output - error output, 0 for success
+     */
+    int dieSelect(char die);
+
+
   public:
     W25N();
 
@@ -70,6 +83,12 @@ class W25N {
     /* reset() -- resets the device. */
     void reset();
 
+    /* int dieSelectOnAdd(uint32_t pageAdd) -- auto changes selected die based on requested address
+     * Input - full range (across all dies) page address
+     * Output - error output, 0 for success
+     */
+    int dieSelectOnAdd(uint32_t pageAdd);
+
     /* getStatusReg(char reg) -- gets the char value from one of the registers:
      * W25N_STAT_REG / W25N_CONFIG_REG / W25N_PROT_REG
      * Output -- register byte value
@@ -80,6 +99,10 @@ class W25N {
      * W25N_STAT_REG / W25N_CONFIG_REG / W25N_PROT_REG
      * set input -- char input to set the reg to */
     void setStatusReg(char reg, char set);
+
+    /* getMaxPage() Returns the max page for the given chip
+     */
+    uint32_t getMaxPage();
 
     /* writeEnable() -- enables write opperations on the chip.
      * Is disabled after a write operation and must be recalled.
@@ -108,6 +131,7 @@ class W25N {
      * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
      * */
     int loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
+    int loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen, uint32_t pageAdd);
 
     /* loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen) -- Transfers datalen number of bytes from the 
      * given buffer to the internal flash buffer, to be programed once a ProgramExecute command is sent.
@@ -117,6 +141,7 @@ class W25N {
      * WILL ERASE THE DATA IN BUF OF LENGTH DATALEN BYTES
      */
     int loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen);
+    int loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen, uint32_t pageAdd);
 
     /* ProgramExecute(uint32_t add) -- Commands the flash to program the internal buffer contents to the addres page
      * given after a loadProgData or loadRandProgData has been called.

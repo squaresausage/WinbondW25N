@@ -28,8 +28,12 @@ int W25N::begin(uint32_t cs){
       return 0;
     }
     if((uint16_t)(jedec[3] << 8 | jedec[4]) == W25M02GV_DEV_ID){
-      this->setStatusReg(W25N_PROT_REG, 0x00);
       this->_model = W25M02GV;
+      this->dieSelect(0);
+      this->setStatusReg(W25N_PROT_REG, 0x00);
+      this->dieSelect(1);
+      this->setStatusReg(W25N_PROT_REG, 0x00);
+      this->dieSelect(0);
       return 0;
     }
   }
@@ -39,6 +43,19 @@ int W25N::begin(uint32_t cs){
 void W25N::reset(){
   char buf[] = {W25N_RESET};
   this->sendData(buf, sizeof(buf));
+}
+
+int W25N::dieSelect(char die){
+  //TODO add some type of input validation
+  char buf[2] = {W25M_DIE_SELECT, die};
+  this->sendData(buf, sizeof(buf));
+  this->_dieSelect = die;
+  return 0;
+}
+
+int W25N::dieSelectOnAdd(uint32_t pageAdd){
+  if(pageAdd > this->getMaxPage()) return 1;
+  return this->dieSelect(pageAdd / W25N01GV_MAX_PAGE);
 }
 
 char W25N::getStatusReg(char reg){
@@ -52,6 +69,12 @@ void W25N::setStatusReg(char reg, char set){
   this->sendData(buf, sizeof(buf));
 }
 
+uint32_t W25N::getMaxPage(){
+  if (_model == W25M02GV) return W25M02GV_MAX_PAGE;
+  if (_model == W25N01GV) return W25N01GV_MAX_PAGE;
+  return 0;
+}
+
 void W25N::writeEnable(){
   char buf[] = {W25N_WRITE_ENABLE};
   this->sendData(buf, sizeof(buf));
@@ -63,7 +86,8 @@ void W25N::writeDisable(){
 }
 
 int W25N::blockErase(uint32_t pageAdd){
-  if(pageAdd > W25N_MAX_PAGE) return 1;
+  if(pageAdd > this->getMaxPage()) return 1;
+  this->dieSelectOnAdd(pageAdd);
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
   char buf[4] = {W25N_BLOCK_ERASE, 0x00, pageHigh, pageLow};
@@ -75,15 +99,15 @@ int W25N::blockErase(uint32_t pageAdd){
 
 int W25N::bulkErase(){
   int error = 0;
-  for(int i = 0; i < W25N_MAX_PAGE; i++){
+  for(uint32_t i = 0; i < this->getMaxPage(); i++){
     if((error = this->blockErase(i)) != 0) return error;
   }
   return 0;
 }
 
 int W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
-  if(columnAdd > W25N_MAX_COLUMN) return 1;
-  if(dataLen > W25N_MAX_COLUMN - columnAdd) return 1;
+  if(columnAdd > (uint32_t)W25N_MAX_COLUMN) return 1;
+  if(dataLen > (uint32_t)W25N_MAX_COLUMN - columnAdd) return 1;
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[3] = {W25N_PROG_DATA_LOAD, columnHigh, columnLow};
@@ -98,9 +122,14 @@ int W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   return 0;
 }
 
+int W25N::loadProgData(uint16_t columnAdd, char* buf, uint32_t dataLen, uint32_t pageAdd){
+  if(this->dieSelectOnAdd(pageAdd)) return 1;
+  return this->loadProgData(columnAdd, buf, dataLen);
+}
+
 int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
-  if(columnAdd > W25N_MAX_COLUMN) return 1;
-  if(dataLen > W25N_MAX_COLUMN - columnAdd) return 1;
+  if(columnAdd > (uint32_t)W25N_MAX_COLUMN) return 1;
+  if(dataLen > (uint32_t)W25N_MAX_COLUMN - columnAdd) return 1;
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[3] = {W25N_RAND_PROG_DATA_LOAD, columnHigh, columnLow};
@@ -115,8 +144,14 @@ int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen){
   return 0;
 }
 
+int W25N::loadRandProgData(uint16_t columnAdd, char* buf, uint32_t dataLen, uint32_t pageAdd){
+  if(this->dieSelectOnAdd(pageAdd)) return 1;
+  return this->loadRandProgData(columnAdd, buf, dataLen);
+}
+
 int W25N::ProgramExecute(uint32_t pageAdd){
-  if(pageAdd > W25N_MAX_PAGE) return 1;
+  if(pageAdd > this->getMaxPage()) return 1;
+  this->dieSelectOnAdd(pageAdd);
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
   this->writeEnable();
@@ -126,7 +161,8 @@ int W25N::ProgramExecute(uint32_t pageAdd){
 }
 
 int W25N::pageDataRead(uint32_t pageAdd){
-  if(pageAdd > W25N_MAX_PAGE) return 1;
+  if(pageAdd > this->getMaxPage()) return 1;
+  this->dieSelectOnAdd(pageAdd);
   char pageHigh = (char)((pageAdd & 0xFF00) >> 8);
   char pageLow = (char)(pageAdd);
   char buf[4] = {W25N_PAGE_DATA_READ, 0x00, pageHigh, pageLow};
@@ -137,8 +173,8 @@ int W25N::pageDataRead(uint32_t pageAdd){
 }
 
 int W25N::read(uint16_t columnAdd, char* buf, uint32_t dataLen){
-  if(columnAdd > W25N_MAX_COLUMN) return 1;
-  if(dataLen > W25N_MAX_COLUMN - columnAdd) return 1;
+  if(columnAdd > (uint32_t)W25N_MAX_COLUMN) return 1;
+  if(dataLen > (uint32_t)W25N_MAX_COLUMN - columnAdd) return 1;
   char columnHigh = (columnAdd & 0xFF00) >> 8;
   char columnLow = columnAdd & 0xff;
   char cmdbuf[4] = {W25N_READ, columnHigh, columnLow, 0x00};
@@ -162,7 +198,7 @@ int W25N::check_WIP(){
 
 int W25N::block_WIP(){
   //Max WIP time is 10ms for block erase so 15 should be a max.
-  long tstamp = millis();
+  unsigned long tstamp = millis();
   while(this->check_WIP()){
     delay(1);
     if (millis() > tstamp + 15) return 1;
