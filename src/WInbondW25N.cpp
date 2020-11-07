@@ -41,8 +41,10 @@ int W25N::begin(uint32_t cs){
 }
 
 void W25N::reset(){
+  //TODO check WIP in case of reset during write
   char buf[] = {W25N_RESET};
   this->sendData(buf, sizeof(buf));
+  delayMicroseconds(600);	//Trst max time 500uS
 }
 
 int W25N::dieSelect(char die){
