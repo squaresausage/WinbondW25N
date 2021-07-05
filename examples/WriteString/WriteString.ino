@@ -1,4 +1,4 @@
-#include "WInbondW25N.h"
+#include "WinbondW25N.h"
 
 W25N flash = W25N();
 
