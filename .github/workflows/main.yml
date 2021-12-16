@@ -26,6 +26,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: arduino/compile-sketches@v1
         with:
-          fqbn: 'arduino:avr:uno'
+          fqbn: 'arduino:samd:zero'
           libraries: |
             - source-path: ./
