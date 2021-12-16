@@ -101,7 +101,7 @@ int W25N::blockErase(uint32_t pageAdd){
 
 int W25N::bulkErase(){
   int error = 0;
-  for(uint32_t i = 0; i < this->getMaxPage(); i++){
+  for(uint32_t i = 0; i < this->getMaxPage(); i+=64){
     if((error = this->blockErase(i)) != 0) return error;
   }
   return 0;
